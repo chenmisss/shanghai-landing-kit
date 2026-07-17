@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>毕业生来上海落地指南</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:#f6f5f1; color:#0b0b0b; line-height:1.7; }
+  header { background:#fff; border-bottom:1px solid #e8e6e0; padding:14px 20px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; position:sticky; top:0; z-index:10; box-shadow:0 1px 6px rgba(0,0,0,.05); }
+  header h1 { font-size:17px; }
+  header .sub { font-size:12px; color:#52514e; }
+  header a.map { margin-left:auto; font-size:13px; color:#256abf; text-decoration:none; border:1px solid #256abf; padding:5px 12px; border-radius:8px; }
+  nav { display:flex; gap:0; background:#fff; border-bottom:1px solid #e8e6e0; padding:0 20px; position:sticky; top:57px; z-index:9; overflow-x:auto; }
+  nav button { border:0; background:none; padding:11px 16px; font-size:14px; cursor:pointer; color:#52514e; border-bottom:2.5px solid transparent; white-space:nowrap; }
+  nav button.on { color:#0d366b; border-bottom-color:#0d366b; font-weight:600; }
+  main { max-width:860px; margin:0 auto; padding:20px 16px 60px; }
+  section { display:none; }
+  section.on { display:block; }
+  .card { background:#fff; border:1px solid #e8e6e0; border-radius:12px; padding:18px 20px; margin-bottom:16px; }
+  .card h2 { font-size:16px; margin-bottom:8px; }
+  .card h3 { font-size:14px; margin:14px 0 6px; color:#0d366b; }
+  .card p, .card li { font-size:13.5px; color:#3a3a37; }
+  .card ul, .card ol { padding-left:20px; }
+  label.field { display:block; font-size:13px; color:#52514e; margin:10px 0 4px; }
+  select, input[type=number] { width:100%; max-width:420px; padding:8px 10px; border:1px solid #d5d3cb; border-radius:8px; font-size:14px; background:#fff; }
+  .verdict { margin-top:14px; padding:14px 16px; border-radius:10px; font-size:14.5px; }
+  .verdict.ok { background:#e9f4ea; border:1px solid #9ec9a2; color:#12501a; }
+  .verdict.no { background:#fdf0e7; border:1px solid #e6b795; color:#7a3d10; }
+  .verdict.info { background:#eaf1fb; border:1px solid #a9c6ee; color:#0d366b; }
+  .verdict b { font-size:18px; }
+  .note { font-size:12px; color:#8b8a85; margin-top:10px; }
+  .note a { color:#256abf; }
+  table { border-collapse:collapse; width:100%; margin:8px 0; font-size:13px; }
+  th, td { border:1px solid #e2e0d8; padding:7px 10px; text-align:left; vertical-align:top; }
+  th { background:#f4f2ec; font-weight:600; }
+  .tag { display:inline-block; font-size:11px; padding:1px 8px; border-radius:10px; background:#eaf1fb; color:#0d366b; margin-left:6px; }
+  .check { display:flex; gap:10px; align-items:flex-start; padding:9px 12px; border:1px solid #e8e6e0; border-radius:10px; margin-bottom:8px; background:#fff; cursor:pointer; }
+  .check input { margin-top:5px; }
+  .check.done { opacity:.55; text-decoration:line-through; }
+  .check .t { font-size:13.5px; }
+  .check .d { font-size:12px; color:#8b8a85; }
+  .warn { background:#fff8e6; border:1px solid #e8d48a; border-radius:10px; padding:10px 14px; font-size:12.5px; color:#6b5410; margin:10px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🧳 毕业生来上海落地指南</h1>
+  <span class="sub">落户自测 · 积分速算 · 租房路线 · 30 天清单</span>
+  <a class="map" href="map.html">🗺 打开公租房通勤地图</a>
+</header>
+<nav>
+  <button class="on" data-t="hukou">① 落户自测</button>
+  <button data-t="jifen">② 居住证积分速算</button>
+  <button data-t="zufang">③ 租房路线图</button>
+  <button data-t="list">④ 落地 30 天清单</button>
+</nav>
+<main>
+
+<!-- ① 落户 -->
+<section id="hukou" class="on">
+  <div class="card">
+    <h2>先查直接落户（不用打分）</h2>
+    <p>应届生落户是来上海<b>成本最低的一次机会</b>，只在毕业当年有效。先看你是否命中免打分通道：</p>
+    <label class="field">最高学历</label>
+    <select id="hkDegree">
+      <option value="phd">博士（应届）</option>
+      <option value="master" selected>硕士（应届）</option>
+      <option value="bachelor">本科（应届）</option>
+    </select>
+    <div id="hkMasterWrap">
+      <label class="field">毕业院校属于？</label>
+      <select id="hkMaster">
+        <option value="sh">上海的高校 / 在沪研究所</option>
+        <option value="syl">全国「世界一流大学建设高校」（双一流A类等）</option>
+        <option value="xk">「一流学科建设高校」且我读的是其建设学科</option>
+        <option value="other">以上都不是</option>
+      </select>
+    </div>
+    <div id="hkBachelorWrap" style="display:none">
+      <label class="field">你的情况？</label>
+      <select id="hkBachelor">
+        <option value="qb">清华 / 北大 本科</option>
+        <option value="shsyl">在沪「世界一流大学建设高校」本科（复旦/交大/同济/华师大等）</option>
+        <option value="wxc">在沪高校本科，且工作签在五个新城或南北转型重点区域</option>
+        <option value="other">以上都不是</option>
+      </select>
+    </div>
+    <div class="verdict info" id="hkVerdict"></div>
+    <div class="note">直接落户仍需满足当年基本申报条件（用人单位资质、诚信记录等）。受理窗口通常<b>每年两批：毕业当年 6 月前后一批、11–12 月补充一批</b>，错过当年基本无法补救——以<a href="https://firstjob.shec.edu.cn/" target="_blank">上海学生事务中心</a>当年《通知》为准。</div>
+  </div>
+
+  <div class="card">
+    <h2>不满足直落？算一下 72 分</h2>
+    <p>非直落的应届生走打分制，<b>标准分 72 分</b>。主干分值如下（附加项每年细则微调）：</p>
+    <label class="field">最高学历</label>
+    <select id="s1"><option value="27">博士（27 分）</option><option value="24" selected>硕士（24 分）</option><option value="21">本科（21 分）</option></select>
+    <label class="field">毕业院校档次</label>
+    <select id="s2"><option value="15">一类：世界一流大学建设高校 / 在沪一流学科建设高校等（15 分）</option><option value="12" selected>二类：一流学科建设高校 / 其他 211 等（12 分）</option><option value="8">其他院校（8 分）</option></select>
+    <label class="field">最高学历阶段成绩排名</label>
+    <select id="s3"><option value="8">前 25%（8 分）</option><option value="6" selected>26%–50%（6 分）</option><option value="4">51%–75%（4 分）</option><option value="2">后 25%（2 分）</option></select>
+    <label class="field">外语水平</label>
+    <select id="s4"><option value="8" selected>六级 / 专业八级（8 分）</option><option value="7">四级 / 专业四级（7 分）</option><option value="0">未达标（0 分）</option></select>
+    <label class="field">计算机水平</label>
+    <select id="s5"><option value="7" selected>达标：研究生可免试 / 本科持相应等级证书（7 分）</option><option value="0">未达标（0 分）</option></select>
+    <label class="field"><input type="checkbox" id="s6"> 最高学历期间有发明专利（+5）　<input type="checkbox" id="s7"> 符合条件的自主创业（+5）</label>
+    <label class="field">其他附加分（荣誉称号 / 学科竞赛 / 用人单位要素等，对照当年细则填 0–15）</label>
+    <input type="number" id="s8" value="0" min="0" max="20">
+    <div class="verdict info" id="score72"></div>
+    <div class="note">分值为 2026 届公开资料整理（<a href="https://www.vgxf.com/shangxue/6460.html" target="_blank">参考</a>），精确判定以当年官方《非上海生源应届毕业生进沪就业评分办法》为准。没够 72 分 ≠ 没戏：看下一张卡的替代路径。</div>
+  </div>
+
+  <div class="card">
+    <h2>落不了户的替代路径（同样能安家）</h2>
+    <ul>
+      <li><b>居住证 + 积分 120</b>：本科有学位（90 分）+ 年龄 ≤43（30 分）= 刚好 120，<b>应届本科生几乎白送</b>——医保、子女教育等大部分待遇就有了。去第 ② 页算。</li>
+      <li><b>留学落户</b>：出去读个硕士回来，条件比应届生宽（社保 6 个月/1 年档）。</li>
+      <li><b>人才引进 / 居转户</b>：工作后走，5–7 年周期，重点机构、临港/五个新城有缩短政策。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ② 积分 -->
+<section id="jifen">
+  <div class="card">
+    <h2>居住证积分 120 分速算</h2>
+    <p>积分不是落户，但 120 分达标即可享受多数公共服务（医保、子女在沪上学等）。前提：先办出《上海市居住证》（居住登记满 6 个月后可办）。</p>
+    <label class="field">年龄</label>
+    <select id="j1"><option value="30" selected>18–43 周岁（30 分）</option><option value="20">44–47 周岁（约 20 分，每大 1 岁减 2 分）</option><option value="10">48 周岁以上（更低，逐岁递减）</option></select>
+    <label class="field">最高学历</label>
+    <select id="j2"><option value="110">博士（110 分）</option><option value="100">硕士（100 分）</option><option value="90" selected>本科且有学位（90 分）</option><option value="60">本科无学位（60 分）</option><option value="50">大专（50 分）</option><option value="0">其他（0 分）</option></select>
+    <label class="field">在沪缴纳社保年限（年）</label>
+    <input type="number" id="j3" value="0" min="0" max="40">
+    <label class="field">社保基数加分（近 4 年累计 36 个月达到）</label>
+    <select id="j4"><option value="0" selected>无 / 刚工作（0 分）</option><option value="25">0.8–1 倍社平基数（25 分）</option><option value="50">1–2 倍（50 分）</option><option value="100">2–3 倍（100 分）</option><option value="120">3 倍（120 分）</option></select>
+    <div class="verdict info" id="jifenOut"></div>
+    <div class="note">规则依据<a href="https://www.shanghai.gov.cn/nw12344/20230103/054285dd8d6243efa185f9d86dbb6764.html" target="_blank">《上海市居住证积分管理办法》政策问答</a>与<a href="https://jzzjf.rsj.sh.gov.cn/jzzjf/pingfen/zc2.jsp" target="_blank">官方模拟打分</a>；职称路线、多倍基数与学历的组合限制未列全，正式判定请用官方打分器。违反计生/严重失信等有一票否决与减分项。</div>
+  </div>
+</section>
+
+<!-- ③ 租房 -->
+<section id="zufang">
+  <div class="card">
+    <h2>毕业生租房三条路，按顺序试</h2>
+    <table>
+      <tr><th>路线</th><th>门槛</th><th>价格</th><th>怎么申请</th></tr>
+      <tr><td><b>① 保障性租赁住房（保租房）</b><span class="tag">毕业生首选</span></td><td>不限户籍。在沪合法就业 + 本市住房困难（人均 &lt;15㎡）；<b>毕业 2 年内凭毕业证即可申请</b></td><td>约市场价 9 折，多数项目月租 2500–3000</td><td>「随申办」App / 小程序搜「保障性租赁住房」，或<a href="https://zfzl.fgj.sh.gov.cn/gg_house/read_me.html" target="_blank">市住房租赁公共服务平台</a>选房源直接联系</td></tr>
+      <tr><td><b>② 公租房</b></td><td>有本市户籍，或居住证 + 稳定就业缴社保；单位也可整体申请</td><td>约市场价 9 折，部分区更低</td><td>各区公租房运营机构；<b>用本项目的 map.html 按通勤时间挑</b></td></tr>
+      <tr><td><b>③ 市场租房</b></td><td>无门槛</td><td>市价。合租主流预算 2000–4500/间</td><td>平台直租/中介。务必避坑（见下）</td></tr>
+    </table>
+    <h3>公积金能帮你付房租（很多人不知道）</h3>
+    <table>
+      <tr><th>情形</th><th>每月可提取</th></tr>
+      <tr><td>租市场房 + 做了租赁合同网签备案</td><td>每户上限 4000 元；新市民/青年人可按<b>实际房租</b>提取</td></tr>
+      <tr><td>租保租房</td><td>按<b>实际房租</b>提取</td></tr>
+      <tr><td>无备案的租房</td><td>每户上限 2500 元</td></tr>
+    </table>
+    <p class="note">2024-11 起按月提取、每月 25 日到账。依据：<a href="https://www.shanghai.gov.cn/qyzfgjjsjzc/20240927/70392c98a8304968a46e8bb62b062f25.html" target="_blank">上海市公积金租房提取政策（市政府发布）</a>。</p>
+    <h3>市场租房避坑清单</h3>
+    <ul>
+      <li><b>查真身</b>：要求出示房产证 + 出租人身份证；二房东必须看到与大房东的合同及转租授权。</li>
+      <li><b>警惕租金贷</b>："押一付一但要下载 App 签约"大概率是租金贷，你在替中介贷款。</li>
+      <li><b>隔断房违规</b>：客厅打隔断可被整治强拆，押金难退。</li>
+      <li><b>定金别乱交</b>：没看到合同全文前不转任何"定金/意向金"。</li>
+      <li><b>合同备案</b>：网签备案既保护你，也解锁 4000/月公积金提取和居住登记材料。</li>
+      <li><b>拍照留证</b>：入住当天拍全屋+水电表读数，退租扯皮神器。</li>
+    </ul>
+    <h3>还有补贴可以薅</h3>
+    <p>多个区对重点产业/学历人才有租房补贴（金额、门槛各区一年一变）。方法：在「随申办」和你就业所在区的「XX 区人社局」公众号里搜<b>「人才安居」「租房补贴」</b>；临港新片区、五个新城力度通常最大（还叠加落户优惠）。</p>
+  </div>
+</section>
+
+<!-- ④ 清单 -->
+<section id="list">
+  <div class="card">
+    <h2>落地 30 天清单（点一项划掉一项，进度自动保存）</h2>
+    <div class="warn">⚠️ 两件事有硬时限：<b>到沪后尽快做居住登记</b>（满 6 个月才能办居住证，晚登记 = 一切顺延）；<b>应届生落户只在毕业当年受理</b>（通常 6 月批 + 11–12 月补充批），别错过。</div>
+    <div id="checks"></div>
+    <div class="note">清单进度存在本机浏览器里（localStorage），换电脑不同步。</div>
+  </div>
+</section>
+
+</main>
+<script>
+// ---------- tabs ----------
+document.querySelectorAll('nav button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('nav button').forEach(x => x.className = '');
+    document.querySelectorAll('main section').forEach(x => x.className = '');
+    b.className = 'on';
+    document.getElementById(b.dataset.t).className = 'on';
+  };
+});
+// ---------- 落户直落判定 ----------
+function hkRender() {
+  const deg = document.getElementById('hkDegree').value;
+  document.getElementById('hkMasterWrap').style.display = deg === 'master' ? '' : 'none';
+  document.getElementById('hkBachelorWrap').style.display = deg === 'bachelor' ? '' : 'none';
+  const v = document.getElementById('hkVerdict');
+  let ok = false, msg = '';
+  if (deg === 'phd') { ok = true; msg = '应届博士不限院校，<b>符合直接落户通道</b>。'; }
+  else if (deg === 'master') {
+    const m = document.getElementById('hkMaster').value;
+    ok = m !== 'other';
+    msg = ok ? '你的硕士类型命中免打分通道，<b>符合直接落户</b>。' : '未命中硕士直落通道，请往下算 72 分。';
+  } else {
+    const bch = document.getElementById('hkBachelor').value;
+    ok = bch !== 'other';
+    msg = ok ? (bch === 'wxc' ? '在沪高校本科 + 五个新城/南北转型区域就业<b>可直接落户</b>（一般有服务承诺要求）。' : '你的本科类型<b>符合直接落户</b>。') : '未命中本科直落通道，请往下算 72 分。';
+  }
+  v.className = 'verdict ' + (ok ? 'ok' : 'no');
+  v.innerHTML = msg;
+}
+['hkDegree', 'hkMaster', 'hkBachelor'].forEach(id => document.getElementById(id).onchange = hkRender);
+hkRender();
+// ---------- 72 分 ----------
+function calc72() {
+  let t = 0;
+  ['s1', 's2', 's3', 's4', 's5'].forEach(id => t += Number(document.getElementById(id).value));
+  if (document.getElementById('s6').checked) t += 5;
+  if (document.getElementById('s7').checked) t += 5;
+  t += Number(document.getElementById('s8').value || 0);
+  const v = document.getElementById('score72');
+  v.className = 'verdict ' + (t >= 72 ? 'ok' : 'no');
+  v.innerHTML = '当前估分：<b>' + t + '</b> / 72 —— ' + (t >= 72 ? '达到标准分，抓紧在受理窗口内申报！' : '还差 ' + (72 - t) + ' 分。看看附加项能否补齐，或转向下方替代路径。');
+}
+['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(id => document.getElementById(id).addEventListener('change', calc72));
+document.getElementById('s8').addEventListener('input', calc72);
+calc72();
+// ---------- 积分 120 ----------
+function calcJifen() {
+  const t = Number(document.getElementById('j1').value) + Number(document.getElementById('j2').value)
+    + Math.min(Number(document.getElementById('j3').value || 0), 40) * 3 + Number(document.getElementById('j4').value);
+  const v = document.getElementById('jifenOut');
+  v.className = 'verdict ' + (t >= 120 ? 'ok' : 'no');
+  v.innerHTML = '当前估分：<b>' + t + '</b> / 120 —— ' + (t >= 120 ? '达标！办出居住证后即可去官方系统正式申请积分。' : '还差 ' + (120 - t) + ' 分（社保每满 1 年 +3，基数达标是大头）。');
+}
+['j1','j2','j3','j4'].forEach(id => { const el = document.getElementById(id); el.addEventListener('change', calcJifen); el.addEventListener('input', calcJifen); });
+calcJifen();
+// ---------- 清单 ----------
+const ITEMS = [
+  ['到沪 7 日内做居住登记', '随申办 App →「来沪人员居住登记」，租房合同/房东配合即可。这是居住证 6 个月计时的起点'],
+  ['确认应届生身份的落户窗口', '毕业当年才有资格；查上海学生事务中心当年通知，和公司人事确认是否具备申报资质'],
+  ['办理入职五险一金', '确认公司按实际工资缴社保公积金（试用期也必须缴），基数影响未来积分/落户'],
+  ['激活医保码 + 随申码', '随申办或支付宝「医保码」，看病买药直接刷'],
+  ['开通交通卡', 'Metro 大都会 App 或手机 Pay 交通联合卡，地铁公交通用'],
+  ['申请保租房 / 公租房', '毕业 2 年内凭毕业证可申保租房；用本项目 map.html 按通勤时间挑项目'],
+  ['设置公积金租房提取', '随申办→公积金提取；网签备案后每月最高 4000 元自动到账'],
+  ['租房合同做网签备案', '不动产登记中心或线上；解锁公积金提取上限 + 居住登记凭证'],
+  ['搜一搜所在区的人才租房补贴', '「XX区人社局」公众号搜「人才安居」，别错过真金白银'],
+  ['居住登记满 6 个月 → 办居住证', '随申办线上办理，办出后可申请 120 积分'],
+  ['申请居住证积分（如需要）', '单位人事通过一网通办提交，用官方模拟打分器先自测'],
+  ['探索城市福利', '图书馆（东馆值得专程去）、博物馆美术馆大多免费预约、社区食堂便宜大碗'],
+];
+const box = document.getElementById('checks');
+const saved = JSON.parse(localStorage.getItem('landing30') || '{}');
+ITEMS.forEach((it, i) => {
+  const div = document.createElement('label');
+  div.className = 'check' + (saved[i] ? ' done' : '');
+  div.innerHTML = '<input type="checkbox" ' + (saved[i] ? 'checked' : '') + '><span><div class="t">' + (i + 1) + '. ' + it[0] + '</div><div class="d">' + it[1] + '</div></span>';
+  div.querySelector('input').onchange = (e) => {
+    saved[i] = e.target.checked;
+    localStorage.setItem('landing30', JSON.stringify(saved));
+    div.className = 'check' + (e.target.checked ? ' done' : '');
+  };
+  box.appendChild(div);
+});
+</script>
+</body>
+</html>

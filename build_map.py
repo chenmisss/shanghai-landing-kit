@@ -134,6 +134,7 @@ html = """<!DOCTYPE html>
     <div class="chips" id="chips"></div>
     <label class="ctl">区域 <select id="distSel"><option value="">全部</option></select></label>
     <label class="ctl">月租≤ <input type="number" id="rentMax" placeholder="不限" step="100"> 元</label>
+    <a href="guide.html" style="font-size:12px;color:#256abf;text-decoration:none;border:1px solid #256abf;padding:4px 10px;border-radius:8px;">🧳 毕业生落地指南</a>
     <span id="stats"></span>
   </header>
   <div id="main">
