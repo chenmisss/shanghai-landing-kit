@@ -92,7 +92,11 @@ python3 build_map.py    # 第 2 条:生成地图。1 秒出结果
 - 点任何圆点：租金/户型/最近地铁站/管家电话/跳高德导航；
 - 进阶：给 `map.html` 的地址栏结尾加 `#dest=经度,纬度,名称` 可以直达某个目的地视图。
 
-> ⚠️ **map.html 里内嵌了你的 JS Key**。发给亲友没问题，但不要公开上传到网上。要做公开服务，请在高德控制台给 JS Key 绑定域名白名单，并把安全密钥改为服务端代理模式（`_AMapSecurityConfig.serviceHost`）。
+> **两个版本，分工明确**：`build_map.py` 会同时生成
+> - **map.html（个人版）**：内嵌你的 JS Key，自己用，**不要外传**；
+> - **map-share.html（分享版）**：**不含任何 Key**，随便发。对方打开会看到一张 2 分钟配置引导卡，粘贴 TA 自己免费注册的 JS Key（只存在 TA 本机浏览器 localStorage，谁的配额谁出）。想一起发 `guide.html` 也可以，它本来就零配置。
+>
+> 要做公开网站服务的话，请给 JS Key 绑定域名白名单，并把安全密钥改为服务端代理模式（`_AMapSecurityConfig.serviceHost`）。
 
 ---
 
@@ -174,7 +178,7 @@ gzf-commute-map/
 ├── config.example.json    配置模板(复制为 config.json 后填 Key)
 ├── listings.csv           房源表(自带上海公租房快照,可自行更新)
 ├── enrich.py              第 1 步:批量计算通勤(高德 Web 服务 API)
-├── build_map.py           第 2 步:生成交互地图 map.html
+├── build_map.py           第 2 步:生成 map.html(个人版)+map-share.html(无Key分享版)
 └── docs/                  截图
 ```
 

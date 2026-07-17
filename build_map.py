@@ -147,9 +147,6 @@ html = """<!DOCTYPE html>
     </div>
   </div>
 </div>
-<script>
-window._AMapSecurityConfig = { securityJsCode: '__SEC_CODE__' }; // 开发环境明文；对外部署请改用代理 serviceHost
-</script>
 <script src="https://webapi.amap.com/loader.js"></script>
 <script>
 const LISTINGS = __DATA__;
@@ -392,8 +389,49 @@ function resetPreset() {
   restyle();
   gmap.setZoomAndCenter(10.6, [121.44, 31.06]);
 }
+const EMBED_JS_KEY = '__JS_KEY__';
+const EMBED_SEC_CODE = '__SEC_CODE__';
+function showSetup(err) {
+  const hasStored = !!localStorage.getItem('gzf_amap_js_key');
+  document.getElementById('map').innerHTML =
+    '<div style="max-width:560px;margin:60px auto;background:#fff;border:1px solid #e8e6e0;border-radius:14px;padding:26px 30px;font-size:14px;line-height:1.8">' +
+    '<h2 style="font-size:17px;margin-bottom:6px">🔑 首次使用:配置你自己的高德地图 Key(免费,约 2 分钟)</h2>' +
+    (err ? '<div style="background:#fdf0e7;border:1px solid #e6b795;color:#7a3d10;border-radius:8px;padding:8px 12px;font-size:13px;margin:8px 0">' + err + '</div>' : '') +
+    '<ol style="padding-left:20px;color:#3a3a37;font-size:13.5px">' +
+    '<li>打开 <a href="https://lbs.amap.com/" target="_blank" style="color:#256abf">高德开放平台</a> 注册并完成个人实名(免费);</li>' +
+    '<li>进入 <a href="https://console.amap.com/dev/key/app" target="_blank" style="color:#256abf">控制台 → 我的应用</a>,创建应用后「添加 Key」,服务平台选 <b>Web端(JS API)</b>;</li>' +
+    '<li>把生成的 <b>Key</b> 和配对的 <b>安全密钥</b> 粘贴到下面(只保存在你自己的浏览器里,不会上传给任何人)。</li></ol>' +
+    '<label style="display:block;font-size:13px;color:#52514e;margin:10px 0 4px">JS API Key</label>' +
+    '<input id="kIn" style="width:100%;padding:9px 10px;border:1px solid #d5d3cb;border-radius:8px;font-size:14px" placeholder="32 位字符,在高德控制台复制">' +
+    '<label style="display:block;font-size:13px;color:#52514e;margin:10px 0 4px">安全密钥</label>' +
+    '<input id="sIn" style="width:100%;padding:9px 10px;border:1px solid #d5d3cb;border-radius:8px;font-size:14px" placeholder="与该 Key 配对,同在控制台一行显示">' +
+    '<button onclick="saveAmapKeys()" style="margin-top:14px;padding:9px 22px;border:0;background:#0d366b;color:#fff;border-radius:8px;font-size:14px;cursor:pointer">保存并加载地图</button>' +
+    (hasStored ? ' <a href="javascript:void(0)" onclick="clearAmapKeys()" style="font-size:12px;color:#8b8a85;margin-left:10px">清除已存 Key</a>' : '') +
+    '</div>';
+  const k = localStorage.getItem('gzf_amap_js_key'), s = localStorage.getItem('gzf_amap_sec');
+  if (k) document.getElementById('kIn').value = k;
+  if (s) document.getElementById('sIn').value = s;
+}
+window.clearAmapKeys = function () {
+  localStorage.removeItem('gzf_amap_js_key');
+  localStorage.removeItem('gzf_amap_sec');
+  location.reload();
+};
+window.saveAmapKeys = function () {
+  const k = document.getElementById('kIn').value.trim();
+  const s = document.getElementById('sIn').value.trim();
+  if (!k || !s) { alert('两个值都要填:Key 和安全密钥'); return; }
+  localStorage.setItem('gzf_amap_js_key', k);
+  localStorage.setItem('gzf_amap_sec', s);
+  location.reload();
+};
+function bootMap() {
+const _k = (EMBED_JS_KEY || localStorage.getItem('gzf_amap_js_key') || '').trim();
+const _s = (EMBED_SEC_CODE || localStorage.getItem('gzf_amap_sec') || '').trim();
+if (!_k || !_s) { showSetup(''); return; }
+window._AMapSecurityConfig = { securityJsCode: _s };
 AMapLoader.load({
-  key: '__JS_KEY__',
+  key: _k,
   version: '2.0',
   plugins: ['AMap.Scale', 'AMap.ToolBar', 'AMap.AutoComplete', 'AMap.Transfer', 'AMap.Driving'],
 }).then((AMap) => {
@@ -476,17 +514,22 @@ AMapLoader.load({
   const hm = location.hash.match(/dest=([0-9.]+),([0-9.]+),([^&]+)/);
   if (hm) setCustomDest(parseFloat(hm[1]), parseFloat(hm[2]), decodeURIComponent(hm[3]));
 }).catch(e => {
-  document.getElementById('map').innerHTML = '<div style="padding:40px;color:#c00">地图加载失败：' + e + '</div>';
   console.error(e);
+  showSetup('地图加载失败:' + e + '。若是自己粘贴的 Key,请确认类型为「Web端(JS API)」且安全密钥与之配对。');
 });
+}
+bootMap();
 </script>
 </body>
 </html>
 """
 
-html = (html.replace("__DATA__", data_js).replace("__JS_KEY__", JS_KEY)
-        .replace("__SEC_CODE__", SEC).replace("__DEST_LON__", DEST_LON).replace("__DEST_LAT__", DEST_LAT)
+base = (html.replace("__DATA__", data_js)
+        .replace("__DEST_LON__", DEST_LON).replace("__DEST_LAT__", DEST_LAT)
         .replace("__DEST_NAME__", DEST_NAME).replace("__CITY__", CITY))
-open(OUT, "w", encoding="utf-8").write(html)
-print(f"地图已生成:{OUT}(内嵌 {len(rows)} 个房源)")
-print("双击 map.html 即可在浏览器打开。注意:文件内嵌了你的 JS Key,请勿公开传播该文件。")
+open(OUT, "w", encoding="utf-8").write(base.replace("__JS_KEY__", JS_KEY).replace("__SEC_CODE__", SEC))
+OUT_SHARE = os.path.join(BASE, "map-share.html")
+open(OUT_SHARE, "w", encoding="utf-8").write(base.replace("__JS_KEY__", "").replace("__SEC_CODE__", ""))
+print(f"个人版:{OUT}(内嵌你的 Key,自己用,勿外传)")
+print(f"分享版:{OUT_SHARE}(不含任何 Key,发给别人;对方打开后按引导粘自己的 Key,存对方本机)")
+print(f"两个文件各内嵌 {len(rows)} 个房源数据。")

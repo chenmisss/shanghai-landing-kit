@@ -1,6 +1,7 @@
 config.json
 enrich_cache.json
 map.html
+map-share.html
 result.csv
 __pycache__/
 .DS_Store
