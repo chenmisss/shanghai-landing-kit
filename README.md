@@ -123,7 +123,7 @@ python3 build_map.py    # 第 2 条:生成地图。1 秒出两个文件
 
 ```text
 帮我跑通一个开源项目「来上海落地包」(公租房通勤地图)。
-项目地址:https://github.com/USERNAME/gzf-commute-map (或:我已下载解压到 ___ )
+项目地址:https://github.com/chenmisss/shanghai-landing-kit (或:我已下载解压到 ___ )
 我的通勤目的地:___(例:张江高科地铁站)
 高德 Web服务 Key:___
 高德 JS API Key:___
@@ -175,7 +175,7 @@ JS API 安全密钥:___
 ## 项目文件一览
 
 ```
-gzf-commute-map/
+shanghai-landing-kit/
 ├── README.md              本教程
 ├── guide.html             毕业生落地指南(零配置,双击即用)
 ├── config.example.json    配置模板(复制为 config.json 后填 Key)
