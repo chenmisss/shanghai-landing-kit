@@ -1,0 +1,7 @@
+{
+  "amap_web_key": "把你的高德【Web服务】Key粘贴到这里",
+  "amap_js_key": "把你的高德【Web端(JS API)】Key粘贴到这里",
+  "amap_js_security_code": "把与JS API Key配对的【安全密钥】粘贴到这里",
+  "destination_name": "莘庄地铁站",
+  "city": "上海"
+}
