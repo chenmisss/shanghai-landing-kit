@@ -46,14 +46,16 @@
 <body>
 <header>
   <h1>🧳 毕业生来上海落地指南</h1>
-  <span class="sub">落户自测 · 积分速算 · 租房路线 · 30 天清单</span>
+  <span class="sub">落户 · 积分 · 租房 · 求职 · 就医 · 30 天清单</span>
   <a class="map" href="map.html">🗺 打开公租房通勤地图</a>
 </header>
 <nav>
   <button class="on" data-t="hukou">① 落户自测</button>
   <button data-t="jifen">② 居住证积分速算</button>
   <button data-t="zufang">③ 租房路线图</button>
-  <button data-t="list">④ 落地 30 天清单</button>
+  <button data-t="job">④ 求职与到手工资</button>
+  <button data-t="yiliao">⑤ 就医指南</button>
+  <button data-t="list">⑥ 落地 30 天清单</button>
 </nav>
 <main>
 
@@ -170,7 +172,87 @@
   </div>
 </section>
 
-<!-- ④ 清单 -->
+<!-- ④ 求职与薪资 -->
+<section id="job">
+  <div class="card">
+    <h2>到手工资计算器（上海 · 2025.7–2026.6 基数）</h2>
+    <p>谈 offer 前先算清楚：税前月薪 ≠ 到手。上海社保基数区间 <b>7460–37302 元</b>，公积金比例 5%–7%（单位统一定，个人单位 1:1 双边缴）。</p>
+    <label class="field">税前月薪（元）</label>
+    <input type="number" id="w1" value="12000" min="0" step="500">
+    <label class="field">公积金比例（问 HR，多数公司 7%）</label>
+    <select id="w2"><option value="0.07" selected>7%</option><option value="0.06">6%</option><option value="0.05">5%</option></select>
+    <label class="field"><input type="checkbox" id="w3" checked> 我在上海租房（个税专项附加扣除 1500 元/月）</label>
+    <div class="verdict info" id="wageOut"></div>
+    <div class="note">口径：个人缴纳 = 养老 8% + 医保 2% + 失业 0.5%（按社保基数）+ 公积金（按公积金基数，下限 2690）；个税按年度综合所得平均到月（应届生前几个月按累计预扣会更低，次年汇算多退少补）。年终奖、专项附加中的赡养/继续教育等未计入。基数依据：<a href="https://rsj.sh.gov.cn/tgsgg_17341/20250918/t0035_1435637.html" target="_blank">上海人社局 2025 年度基数公告</a>。</div>
+  </div>
+  <div class="card">
+    <h2>薪资横向对比，去哪看靠谱数据</h2>
+    <table>
+      <tr><th>渠道</th><th>适合看什么</th></tr>
+      <tr><td>OfferShow / 牛客网「薪资爆料」</td><td>应届校招各公司各岗位的真实 offer 数字（白菜价/ssp 区间），对应届生最有参考价值</td></tr>
+      <tr><td>脉脉</td><td>社招跳槽行情、公司内部真实吐槽</td></tr>
+      <tr><td>levels.fyi</td><td>外企/大厂职级对标（上海外企岗有数据）</td></tr>
+      <tr><td>招聘平台自带区间</td><td>BOSS直聘/拉勾的岗位区间——取中位数看，上限多是钓鱼</td></tr>
+    </table>
+    <p class="note">谈薪一句话：先问清「税前还是税后、几薪、公积金比例、试用期折扣」，再用上面的计算器换算成到手，可比性才成立。</p>
+  </div>
+  <div class="card">
+    <h2>签约避坑（应届生高发）</h2>
+    <ul>
+      <li><b>培训贷 = 诈骗</b>：入职先让你贷款交"培训费"的，无条件跑，报警 96110。</li>
+      <li><b>传销识别</b>：异地"总部面试"+ 收身份证 + 拉人头返利，三条占一条就撤。</li>
+      <li><b>试用期有法定上限</b>：3 年期合同试用期最长 6 个月，工资不得低于转正的 80%；试用期也必须缴五险一金。</li>
+      <li><b>想保应届生身份考公考编的注意</b>：一旦缴纳社保，多数岗位不再认定你为应届生——签约前想清楚顺序。</li>
+      <li><b>三方协议违约金</b>：签前看清数额，违约常见几千元；口头承诺（转正薪资/base 地）落到 offer 邮件里。</li>
+      <li><b>欠薪维权</b>：打 12333（人社热线）或在「随申办」搜劳动监察投诉，试用期被"白嫖"也能追。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ⑤ 就医 -->
+<section id="yiliao">
+  <div class="card">
+    <h2>就医三原则（记住这个就不会被坑）</h2>
+    <ol>
+      <li><b>白名单思维</b>：上海公立三甲资源全国最富，小病社区医院、大病对着下表挂号，<b>根本轮不到民营医院</b>；</li>
+      <li><b>挂号只走官方渠道</b>：「随申办」/「上海市级医院互联互通互认」小程序 /「健康云」/ 各医院官方公众号。<b>搜索引擎广告位、"在线客服问诊"一律不点</b>；</li>
+      <li><b>急诊直接去最近的公立大医院</b>，救护车 120，别在网上问。</li>
+    </ol>
+    <h3>上海头部公立医院速查（按毛病找）</h3>
+    <table>
+      <tr><th>科室方向</th><th>头部医院</th></tr>
+      <tr><td>综合疑难</td><td>中山医院、瑞金医院、华山医院、仁济医院</td></tr>
+      <tr><td>骨科/运动损伤</td><td>市六医院（四肢显微外科全国招牌）、长征医院</td></tr>
+      <tr><td>神经内外科</td><td>华山医院（全国第一梯队）</td></tr>
+      <tr><td>皮肤科</td><td>华山医院皮肤科（挂号大热门，早约）</td></tr>
+      <tr><td>心血管</td><td>中山医院、瑞金医院</td></tr>
+      <tr><td>内分泌/血液</td><td>瑞金医院</td></tr>
+      <tr><td>消化/肾内</td><td>仁济医院、中山医院</td></tr>
+      <tr><td>眼科/耳鼻喉</td><td>复旦五官科医院（汾阳路）</td></tr>
+      <tr><td>口腔/整形修复</td><td>市九医院</td></tr>
+      <tr><td>妇产科</td><td>红房子医院、一妇婴</td></tr>
+      <tr><td>肿瘤</td><td>复旦肿瘤医院</td></tr>
+      <tr><td>呼吸/胸外</td><td>市肺科医院、市胸科医院</td></tr>
+      <tr><td>精神心理</td><td>市精神卫生中心（宛平南路 600 号，公立、无羞耻，挂号正规）</td></tr>
+    </table>
+    <p class="note">夜里难受、情绪扛不住：上海 24 小时心理热线 <b>962525</b>，免费。</p>
+  </div>
+  <div class="card">
+    <h2>怎么识别与排除「莆田系」</h2>
+    <p>魏则西事件后，GitHub 有个 6700+ star 的众包名单仓库 <a href="https://github.com/open-power-workgroup/Hospital" target="_blank">open-power-workgroup/Hospital</a>，按省市列出了疑似莆田系医疗机构，可以拿来<b>反查某家民营医院的名字</b>。但要注意：它靠社区零星维护，收录时间多在早年，<b>民营医院改名、换壳很快，名单只能当参考，不在名单上≠安全</b>。</p>
+    <p>更可靠的是记住行为特征，占两条以上直接拉黑：</p>
+    <ul>
+      <li>搜索引擎买广告位、名字高仿公立（如"上海XX医院"看着像三甲但查无此公立编制）；</li>
+      <li>主打男科/妇科/皮肤/不孕不育/整形等"羞于启齿"科室；</li>
+      <li>进门先"网上客服"热聊、到院秒安排"专家"，检查一路加项；</li>
+      <li>治疗中途加价、恐吓式话术（"再不治就晚了"）；</li>
+      <li>医保刷不了或想方设法让你自费、分期贷款。</li>
+    </ul>
+    <p class="note">验证一家医院是否公立：随申办/健康云搜它是否在<b>医保定点公立机构</b>列表；或看全称是否为"XX大学附属/上海市第X人民医院"体系。</p>
+  </div>
+</section>
+
+<!-- ⑥ 清单 -->
 <section id="list">
   <div class="card">
     <h2>落地 30 天清单（点一项划掉一项，进度自动保存）</h2>
@@ -189,8 +271,14 @@ document.querySelectorAll('nav button').forEach(b => {
     document.querySelectorAll('main section').forEach(x => x.className = '');
     b.className = 'on';
     document.getElementById(b.dataset.t).className = 'on';
+    history.replaceState(null, '', '#' + b.dataset.t);
   };
 });
+const initTab = location.hash.slice(1);
+if (initTab) {
+  const btn = document.querySelector('nav button[data-t="' + initTab.replace(/[^a-z]/g, '') + '"]');
+  if (btn) btn.onclick();
+}
 // ---------- 落户直落判定 ----------
 function hkRender() {
   const deg = document.getElementById('hkDegree').value;
@@ -237,6 +325,34 @@ function calcJifen() {
 }
 ['j1','j2','j3','j4'].forEach(id => { const el = document.getElementById(id); el.addEventListener('change', calcJifen); el.addEventListener('input', calcJifen); });
 calcJifen();
+// ---------- 到手工资 ----------
+function annualTax(taxable) {
+  if (taxable <= 0) return 0;
+  const B = [[36000,.03,0],[144000,.10,2520],[300000,.20,16920],[420000,.25,31920],[660000,.30,52920],[960000,.35,85920],[Infinity,.45,181920]];
+  for (const [cap, r, q] of B) if (taxable <= cap) return taxable * r - q;
+}
+function calcWage() {
+  const gross = Number(document.getElementById('w1').value || 0);
+  const r = Number(document.getElementById('w2').value);
+  const rent = document.getElementById('w3').checked ? 1500 : 0;
+  const sb = Math.min(Math.max(gross, 7460), 37302);       // 社保基数
+  const gb = Math.min(Math.max(gross, 2690), 37302);       // 公积金基数
+  const shebao = sb * (0.08 + 0.02 + 0.005);
+  const gjj = Math.round(gb * r);
+  const monthlyTaxable = gross - shebao - gjj - 5000 - rent;
+  const tax = annualTax(monthlyTaxable * 12) / 12;
+  const net = gross - shebao - gjj - tax;
+  const v = document.getElementById('wageOut');
+  v.className = 'verdict info';
+  v.innerHTML = '月到手约 <b>' + Math.round(net).toLocaleString() + '</b> 元' +
+    '<br><span style="font-size:12.5px">= 税前 ' + gross.toLocaleString() +
+    ' − 社保个人 ' + Math.round(shebao) + '（养老' + Math.round(sb*.08) + '+医保' + Math.round(sb*.02) + '+失业' + Math.round(sb*.005) + '）' +
+    ' − 公积金个人 ' + gjj + ' − 个税约 ' + Math.round(tax) + '</span>' +
+    '<br><span style="font-size:12.5px">另有公积金双边入账 <b>' + (gjj*2).toLocaleString() + '</b> 元/月（个人+单位），租房可每月提取——你的真实可支配 ≈ <b>' +
+    Math.round(net + gjj*2).toLocaleString() + '</b> 元</span>';
+}
+['w1','w2','w3'].forEach(id => { const el = document.getElementById(id); el.addEventListener('change', calcWage); el.addEventListener('input', calcWage); });
+calcWage();
 // ---------- 清单 ----------
 const ITEMS = [
   ['到沪 7 日内做居住登记', '随申办 App →「来沪人员居住登记」，租房合同/房东配合即可。这是居住证 6 个月计时的起点'],
