@@ -196,7 +196,12 @@ def geocode_one(r):
                 res = {"loc": p["location"], "src": "poi-addr", "fmt": s(p.get("name"))}
                 break
     with _cache_lock:
-        cache["geo"][addr] = res or {"loc": "", "src": "fail"}
+        if res:
+            cache["geo"][addr] = res
+        elif not ({"v3/geocode/geo", "v3/place/text"} & DAILY_DEAD):
+            cache["geo"][addr] = {"loc": "", "src": "fail"}
+        else:
+            return  # 配额耗尽导致的失败不落盘,明天重跑自动补
     save_ckpt()
     if _done[0] % 50 == 0:
         log(f"  地理编码进度 ~{_done[0]}")
@@ -243,6 +248,8 @@ def transit_one(r):
     if not loc:
         return
     d = call("v3/direction/transit/integrated", {"origin": loc, "destination": DEST, "city": CITY, "strategy": "0"})
+    if d is None and "v3/direction/transit/integrated" in DAILY_DEAD:
+        return  # 配额耗尽:不落缓存,明天重跑自动补
     out = None
     transits = ((d or {}).get("route", {}) or {}).get("transits", []) or []
     if transits:
@@ -255,8 +262,12 @@ def transit_one(r):
                 lines.append(nm.split("(")[0])
                 if not first_stop:
                     first_stop = s((bl[0].get("departure_stop", {}) or {}).get("name"))
-        out = {"min": round(int(t["duration"])/60), "km": round(int(t.get("distance", 0))/1000, 1),
-               "walk_m": int(t.get("walking_distance", 0)), "lines": " → ".join(lines), "first_stop": first_stop}
+        dist_raw = s(t.get("distance")) or "0"
+        walk_raw = s(t.get("walking_distance")) or "0"
+        out = {"min": round(int(t["duration"])/60),
+               "km": round(int(dist_raw)/1000, 1) if dist_raw.isdigit() else None,
+               "walk_m": int(walk_raw) if walk_raw.isdigit() else 0,
+               "lines": " → ".join(lines), "first_stop": first_stop}
     with _cache_lock:
         cache["transit"][r["_id"]] = out
     save_ckpt()
@@ -269,6 +280,8 @@ def metro_one(r):
         return
     d = call("v3/place/around", {"location": loc, "types": "150500", "radius": "3000",
                                  "sortrule": "distance", "offset": 1, "page": 1})
+    if d is None and "v3/place/around" in DAILY_DEAD:
+        return  # 配额耗尽:不落缓存
     pois = (d or {}).get("pois", []) or []
     out = None
     if pois:

@@ -359,7 +359,7 @@ document.querySelectorAll('nav button').forEach(b => {
     document.querySelectorAll('main section').forEach(x => x.className = '');
     b.className = 'on';
     document.getElementById(b.dataset.t).className = 'on';
-    history.replaceState(null, '', '#' + b.dataset.t);
+    try { history.replaceState(null, '', '#' + b.dataset.t); } catch (e) { /* 个别浏览器 file:// 下禁用 History API */ }
   };
 });
 document.querySelectorAll('.mcard[data-t]').forEach(c => {

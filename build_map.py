@@ -187,6 +187,9 @@ let bucketOn = [true, true, true, true, true, true];
 let rentMax = null, distSel = '';
 let markers = [], infoWindow = null, gmap = null, destMarker = null, AMapRef = null;
 
+function esc(t) {
+  return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 function buckets() { return custom ? DIST_BUCKETS : TIME_BUCKETS; }
 function distKm(x) {
   const D = custom || PRESET, rad = Math.PI / 180;
@@ -220,9 +223,10 @@ function iwHtml(x) {
       (x.dk != null ? ' <span class="dim">' + x.dk + ' km</span>' : '') + '</div>';
   } else {
     const c = calc[x.i];
-    commute = '<div>直线 <span class="big">' + distKm(x).toFixed(1) + ' km</span> → ' + custom.name + '</div>';
+    commute = '<div>直线 <span class="big">' + distKm(x).toFixed(1) + ' km</span> → ' + esc(custom.name) + '</div>';
     if (c && c.st === 'done') {
-      commute += '<div>🚇 <span class="big">' + (c.tm != null ? c.tm + ' 分钟' : '无方案') + '</span> · 🚗 <span class="big">' + (c.dm != null ? c.dm + ' 分钟' : '—') + '</span></div>';
+      commute += '<div>🚇 <span class="big">' + (c.tm != null ? c.tm + ' 分钟' : '无方案') + '</span> · 🚗 <span class="big">' + (c.dm != null ? c.dm + ' 分钟' : '—') + '</span>' +
+        ((c.tm == null && c.dm == null) ? ' <a class="go" href="javascript:void(0)" onclick="recalcOne(' + x.i + ')">↻ 重算</a>' : '') + '</div>';
     } else if (c && c.st === 'pending') {
       commute += '<div class="dim">通勤时间计算中…</div>';
     } else {
@@ -350,6 +354,10 @@ function calcOne(x, token) {
     });
   });
 }
+window.recalcOne = function (i) {
+  delete calc[i];
+  calcAndRefresh(i);
+};
 window.calcAndRefresh = async function (i) {
   const x = LISTINGS[i];
   const token = calcToken;
@@ -382,7 +390,7 @@ function setCustomDest(lon, lat, name) {
   document.getElementById('resetBtn').style.display = 'inline-block';
   document.getElementById('modeSeg').className = 'seg disabled';
   destMarker.setPosition([lon, lat]);
-  destMarker.setContent('<div class="dest-pin"><div class="core"></div><div class="lbl">' + name + '</div></div>');
+  destMarker.setContent('<div class="dest-pin"><div class="core"></div><div class="lbl">' + esc(name) + '</div></div>');
   infoWindow.close();
   restyle();
   gmap.setZoomAndCenter(11.5, [lon, lat]);
@@ -526,7 +534,11 @@ AMapLoader.load({
   restyle();
   // #dest=lon,lat,名称 直达自定义目的地
   const hm = location.hash.match(/dest=([0-9.]+),([0-9.]+),([^&]+)/);
-  if (hm) setCustomDest(parseFloat(hm[1]), parseFloat(hm[2]), decodeURIComponent(hm[3]));
+  if (hm) {
+    let nm = hm[3];
+    try { nm = decodeURIComponent(nm); } catch (e) { /* 保留原文 */ }
+    setCustomDest(parseFloat(hm[1]), parseFloat(hm[2]), nm);
+  }
 }).catch(e => {
   console.error(e);
   showSetup('地图加载失败:' + e + '。若是自己粘贴的 Key,请确认类型为「Web端(JS API)」且安全密钥与之配对。');
