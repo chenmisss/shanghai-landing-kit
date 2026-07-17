@@ -93,6 +93,10 @@ html = """<!DOCTYPE html>
   #destInput { width:220px; padding:6px 10px; border:2px solid #0d366b; border-radius:8px; font-size:13px; }
   #resetBtn { padding:6px 12px; border:1px solid #d5d3cb; border-radius:8px; background:#fff; font-size:12px; cursor:pointer; color:#52514e; display:none; }
   #stats { font-size:12px; color:#52514e; margin-left:auto; }
+  #modulebar { display:flex; align-items:center; gap:8px; padding:7px 16px; background:#0d366b; overflow-x:auto; }
+  #modulebar .lbl { color:#bcd3f0; font-size:12.5px; flex:none; font-weight:600; }
+  #modulebar a { color:#fff; font-size:12.5px; text-decoration:none; background:rgba(255,255,255,.14); border-radius:14px; padding:3px 12px; flex:none; transition:background .12s; }
+  #modulebar a:hover { background:rgba(255,255,255,.3); }
   #main { flex:1; display:flex; min-height:0; }
   #map { flex:1; }
   #panel { width:330px; background:#fcfcfb; border-left:1px solid #e8e6e0; overflow-y:auto; }
@@ -136,9 +140,19 @@ html = """<!DOCTYPE html>
     <div class="chips" id="chips"></div>
     <label class="ctl">区域 <select id="distSel"><option value="">全部</option></select></label>
     <label class="ctl">月租≤ <input type="number" id="rentMax" placeholder="不限" step="100"> 元</label>
-    <a href="guide.html" style="font-size:12px;color:#256abf;text-decoration:none;border:1px solid #256abf;padding:4px 10px;border-radius:8px;">🧳 毕业生落地指南</a>
     <span id="stats"></span>
   </header>
+  <div id="modulebar">
+    <span class="lbl">🧳 毕业生落地指南</span>
+    <a href="guide.html">⌂ 首页</a>
+    <a href="guide.html#hukou">🪪 落户自测</a>
+    <a href="guide.html#jifen">📊 积分速算</a>
+    <a href="guide.html#zufang">🏘 租房路线</a>
+    <a href="guide.html#job">💰 到手工资</a>
+    <a href="guide.html#yiliao">🏥 就医指南</a>
+    <a href="guide.html#xincheng">🏙 新城通勤</a>
+    <a href="guide.html#list">✅ 30天清单</a>
+  </div>
   <div id="main">
     <div id="map"></div>
     <div id="panel">
