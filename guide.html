@@ -41,6 +41,14 @@
   .check .t { font-size:13.5px; }
   .check .d { font-size:12px; color:#8b8a85; }
   .warn { background:#fff8e6; border:1px solid #e8d48a; border-radius:10px; padding:10px 14px; font-size:12.5px; color:#6b5410; margin:10px 0; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(235px,1fr)); gap:14px; margin-top:6px; }
+  .mcard { background:#fff; border:1px solid #e8e6e0; border-radius:14px; padding:18px 18px 16px; cursor:pointer; transition:transform .12s, box-shadow .12s; display:block; text-decoration:none; color:inherit; }
+  .mcard:hover { transform:translateY(-3px); box-shadow:0 6px 18px rgba(13,54,107,.12); border-color:#a9c6ee; }
+  .mcard .ic { font-size:26px; }
+  .mcard h3 { font-size:15px; color:#0b0b0b; margin:8px 0 4px; }
+  .mcard p { font-size:12.5px; color:#52514e; line-height:1.6; margin:0; }
+  .mcard .hook { display:inline-block; margin-top:8px; font-size:11.5px; color:#0d366b; background:#eaf1fb; border-radius:10px; padding:2px 9px; }
+  .homeh { font-size:15px; color:#3a3a37; margin:4px 0 12px; }
 </style>
 </head>
 <body>
@@ -50,7 +58,8 @@
   <a class="map" href="map.html">🗺 打开公租房通勤地图</a>
 </header>
 <nav>
-  <button class="on" data-t="hukou">① 落户自测</button>
+  <button class="on" data-t="home">⌂ 首页</button>
+  <button data-t="hukou">① 落户自测</button>
   <button data-t="jifen">② 居住证积分速算</button>
   <button data-t="zufang">③ 租房路线图</button>
   <button data-t="job">④ 求职与到手工资</button>
@@ -60,8 +69,23 @@
 </nav>
 <main>
 
+<!-- ⌂ 首页七宫格 -->
+<section id="home" class="on">
+  <p class="homeh">刚毕业来上海？八件事，一屏看全。点卡片进入：</p>
+  <div class="grid">
+    <div class="mcard" data-t="hukou"><span class="ic">🪪</span><h3>① 落户自测</h3><p>先查直接落户通道，不中再算 72 分——只在毕业当年有效。</p><span class="hook">硕士大概率直落</span></div>
+    <div class="mcard" data-t="jifen"><span class="ic">📊</span><h3>② 居住证积分速算</h3><p>120 分达标即享医保、子女教育等大部分待遇。</p><span class="hook">本科+学位 = 白送 120 分</span></div>
+    <div class="mcard" data-t="zufang"><span class="ic">🏘</span><h3>③ 租房路线图</h3><p>保租房 → 公租房 → 市场租房，含避坑清单与各区补贴。</p><span class="hook">公积金每月最高提 4000 付房租</span></div>
+    <div class="mcard" data-t="job"><span class="ic">💰</span><h3>④ 求职与到手工资</h3><p>到手工资计算器、薪资数据渠道、签约六坑、考公日历。</p><span class="hook">税前 12000 ≈ 到手 9770</span></div>
+    <div class="mcard" data-t="yiliao"><span class="ic">🏥</span><h3>⑤ 就医指南</h3><p>公立三甲白名单、官方挂号渠道、医保三段式报销。</p><span class="hook">莆田系五特征识别</span></div>
+    <div class="mcard" data-t="xincheng"><span class="ic">🏙</span><h3>⑥ 新城与通勤账</h3><p>五个新城租金/产业/落户 buff 对比 + 通勤成本计算器。</p><span class="hook">新城租金 ≈ 市区一半</span></div>
+    <div class="mcard" data-t="list"><span class="ic">✅</span><h3>⑦ 落地 30 天清单</h3><p>12 件事按顺序勾，进度自动保存在本机。</p><span class="hook">居住登记有硬时限，先办</span></div>
+    <a class="mcard" href="map.html"><span class="ic">🗺</span><h3>公租房通勤地图</h3><p>713 个房源按到你公司的真实通勤时间着色排序。</p><span class="hook">输入任意目的地</span></a>
+  </div>
+</section>
+
 <!-- ① 落户 -->
-<section id="hukou" class="on">
+<section id="hukou">
   <div class="card">
     <h2>先查直接落户（不用打分）</h2>
     <p>应届生落户是来上海<b>成本最低的一次机会</b>，只在毕业当年有效。先看你是否命中免打分通道：</p>
@@ -336,6 +360,13 @@ document.querySelectorAll('nav button').forEach(b => {
     b.className = 'on';
     document.getElementById(b.dataset.t).className = 'on';
     history.replaceState(null, '', '#' + b.dataset.t);
+  };
+});
+document.querySelectorAll('.mcard[data-t]').forEach(c => {
+  c.onclick = () => {
+    const btn = document.querySelector('nav button[data-t="' + c.dataset.t + '"]');
+    if (btn) btn.onclick();
+    window.scrollTo(0, 0);
   };
 });
 const initTab = location.hash.slice(1);
