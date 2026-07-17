@@ -98,7 +98,9 @@ html = """<!DOCTYPE html>
   #panel { width:330px; background:#fcfcfb; border-left:1px solid #e8e6e0; overflow-y:auto; }
   #panelHead { padding:10px 14px 6px; position:sticky; top:0; background:#fcfcfb; z-index:2; border-bottom:1px solid #f0efec; }
   #panelHead h2 { font-size:13px; color:#52514e; font-weight:600; }
-  #moreBtn { margin-top:6px; padding:4px 10px; border:1px solid #0d366b; color:#0d366b; background:#fff; border-radius:6px; font-size:12px; cursor:pointer; display:none; }
+  #moreBtn, #allBtn, #stopBtn { margin:6px 6px 0 0; padding:4px 10px; border:1px solid #0d366b; color:#0d366b; background:#fff; border-radius:6px; font-size:12px; cursor:pointer; display:none; }
+  #stopBtn { border-color:#d03b3b; color:#d03b3b; }
+  #panelHint { margin-top:6px; }
   .row { padding:8px 14px; border-bottom:1px solid #f0efec; cursor:pointer; display:flex; gap:10px; align-items:baseline; }
   .row:hover { background:#f0f4fa; }
   .row .rank { font-size:11px; color:#8b8a85; width:18px; flex:none; }
@@ -140,7 +142,7 @@ html = """<!DOCTYPE html>
   <div id="main">
     <div id="map"></div>
     <div id="panel">
-      <div id="panelHead"><h2 id="panelTitle"></h2><button id="moreBtn">再精算 30 个</button></div>
+      <div id="panelHead"><h2 id="panelTitle"></h2><button id="moreBtn">再精算 30 个</button><button id="allBtn">精算全部</button><button id="stopBtn">停止</button><div id="panelHint" class="hint"></div></div>
       <div id="list"></div>
     </div>
   </div>
@@ -255,10 +257,17 @@ function renderChips() {
     el.appendChild(c);
   });
 }
+function visibleSorted() {
+  return LISTINGS.filter(visible).sort((a, b) => distKm(a) - distKm(b));
+}
 function listRows() {
   const vis = LISTINGS.filter(visible);
   if (!custom) return vis.filter(x => x[mode] != null).sort((a, b) => a[mode] - b[mode]).slice(0, 40);
-  return vis.sort((a, b) => distKm(a) - distKm(b)).slice(0, 40);
+  const key = (x) => {
+    const c = calc[x.i];
+    return (c && c.st === 'done' && c.tm != null) ? c.tm : 1e6 + distKm(x);
+  };
+  return vis.sort((a, b) => key(a) - key(b)).slice(0, 40);
 }
 function renderList() {
   const rowsv = listRows();
@@ -289,8 +298,13 @@ function renderList() {
   document.getElementById('panelTitle').textContent = custom
     ? '离「' + custom.name + '」最近 40 个 · 已精算 ' + done + ' 个'
     : '最近 40 个（按' + (mode === 'tm' ? '地铁/公交' : '驾车') + '时间）';
-  const uncomputed = custom ? listRows().filter(x => !calc[x.i]).length : 0;
+  const uncomputed = custom ? LISTINGS.filter(x => visible(x) && !calc[x.i]).length : 0;
   document.getElementById('moreBtn').style.display = (custom && uncomputed > 0 && !calcBusy) ? 'inline-block' : 'none';
+  document.getElementById('allBtn').style.display = (custom && uncomputed > 30 && !calcBusy) ? 'inline-block' : 'none';
+  document.getElementById('stopBtn').style.display = (custom && calcBusy) ? 'inline-block' : 'none';
+  document.getElementById('panelHint').textContent = custom
+    ? '已精算的按通勤时间排前、未算的按直线距离。要 713 个全量精算版:把 config.json 的目的地改成这里,重跑 enrich.py(用你自己的配额,约 15 分钟)。'
+    : '';
 }
 function focusOn(x) {
   gmap.setZoomAndCenter(13, [x.lon, x.lat]);
@@ -336,7 +350,8 @@ window.calcAndRefresh = async function (i) {
 async function autoCompute(n) {
   const token = calcToken;
   calcBusy = true;
-  const cand = listRows().filter(x => !calc[x.i]).slice(0, n);
+  renderList();
+  const cand = visibleSorted().filter(x => !calc[x.i]).slice(0, n);
   for (const x of cand) {
     if (token !== calcToken) break;
     await calcOne(x, token);
@@ -420,6 +435,18 @@ AMapLoader.load({
   });
   document.getElementById('resetBtn').onclick = resetPreset;
   document.getElementById('moreBtn').onclick = () => autoCompute(30);
+  document.getElementById('allBtn').onclick = () => {
+    const cnt = LISTINGS.filter(x => visible(x) && !calc[x.i]).length;
+    if (!cnt) return;
+    const mins = Math.max(1, Math.ceil(cnt * 1.8 / 60));
+    if (confirm('将对当前可见的 ' + cnt + ' 个房源逐一实算地铁+驾车路线,约消耗 ' + (cnt * 2) + ' 次 JSAPI 配额、耗时约 ' + mins + ' 分钟(期间可随时点「停止」)。继续?')) autoCompute(cnt);
+  };
+  document.getElementById('stopBtn').onclick = () => {
+    calcToken++;
+    calcBusy = false;
+    for (const k in calc) if (calc[k].st === 'pending') delete calc[k];
+    renderList();
+  };
   document.getElementById('btnTransit').onclick = () => { mode = 'tm'; setSeg(); restyle(); };
   document.getElementById('btnDrive').onclick = () => { mode = 'dm'; setSeg(); restyle(); };
   function setSeg() {
