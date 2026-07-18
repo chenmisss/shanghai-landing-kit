@@ -92,6 +92,7 @@ html = """<!DOCTYPE html>
   .ctl select { padding:5px 6px; border:1px solid #d5d3cb; border-radius:6px; font-size:13px; background:#fff; }
   #destInput { width:220px; padding:6px 10px; border:2px solid #0d366b; border-radius:8px; font-size:13px; }
   #resetBtn { padding:6px 12px; border:1px solid #d5d3cb; border-radius:8px; background:#fff; font-size:12px; cursor:pointer; color:#52514e; display:none; }
+  #exportBtn { padding:6px 12px; border:1px solid #d99a06; border-radius:8px; background:#fff; font-size:12px; cursor:pointer; color:#a87804; display:none; }
   #stats { font-size:12px; color:#52514e; margin-left:auto; }
   #modulebar { display:flex; align-items:center; gap:8px; padding:7px 16px; background:#0d366b; overflow-x:auto; }
   #modulebar .lbl { color:#bcd3f0; font-size:12.5px; flex:none; font-weight:600; }
@@ -150,6 +151,7 @@ html = """<!DOCTYPE html>
       <button id="btnFav" data-v="fav">⭐ 收藏 (0)</button>
       <button id="btnBan" data-v="ban">🚫 已排除 (0)</button>
     </div>
+    <button id="exportBtn" title="把收藏的房源导出为 CSV 表格(Excel/WPS 直接打开),含租金、电话和当前目的地的通勤时间">⬇ 导出收藏</button>
     <span id="stats"></span>
   </header>
   <div id="modulebar">
@@ -297,6 +299,7 @@ function restyle() {
   const fb = document.getElementById('btnFav'), bb = document.getElementById('btnBan');
   if (fb) fb.textContent = '⭐ 收藏 (' + favSet.size + ')';
   if (bb) bb.textContent = '🚫 已排除 (' + banSet.size + ')';
+  document.getElementById('exportBtn').style.display = favSet.size ? 'inline-block' : 'none';
   renderChips();
   renderList();
 }
@@ -375,6 +378,34 @@ window.toggleFav = function (i) {
   if (favSet.has(k)) favSet.delete(k); else { favSet.add(k); banSet.delete(k); }
   saveMarks(); restyle();
   infoWindow.setContent(iwHtml(x));
+};
+function csvCell(v) {
+  v = (v == null) ? '' : String(v);
+  return /[",\\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+function favCsv() {
+  const D = custom || PRESET;
+  const items = LISTINGS.filter(x => favSet.has(pkey(x))).sort((a, b) => distKm(a) - distKm(b));
+  const head = ['项目名称', '区域', '地址', '户型', '最低租金', '最高租金', '最小面积', '最大面积', '联系电话', '目的地', '直线km', '地铁分钟', '驾车分钟', '公交线路', '最近轨交站', '到站距离m', '轨交线路'];
+  const lines = [head.join(',')];
+  items.forEach(x => {
+    let tm = null, dm = null, tl = '';
+    if (!custom) { tm = x.tm; dm = x.dm; tl = x.tl; }
+    else { const c = calc[x.i]; if (c && c.st === 'done') { tm = c.tm; dm = c.dm; } }
+    lines.push([x.n, x.d, x.a, x.hx, x.rl, x.rh, x.al, x.ah, x.ph, D.name, distKm(x).toFixed(1), tm, dm, tl, x.mn, x.md, x.ml].map(csvCell).join(','));
+  });
+  return lines.join('\\n');
+}
+window.exportFavs = function () {
+  if (!favSet.size) return;
+  const D = custom || PRESET;
+  const blob = new Blob([String.fromCharCode(0xFEFF) + favCsv()], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const d = new Date(), p = (n) => (n < 10 ? '0' : '') + n;
+  a.download = '收藏房源-' + D.name.replace(/[\\/:*?"<>|]/g, '') + '-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
 };
 window.toggleBan = function (i) {
   const x = LISTINGS[i], k = pkey(x);
@@ -549,6 +580,7 @@ AMapLoader.load({
     setCustomDest(e.lnglat.getLng(), e.lnglat.getLat(), '地图选点');
   });
   document.getElementById('resetBtn').onclick = resetPreset;
+  document.getElementById('exportBtn').onclick = exportFavs;
   document.getElementById('moreBtn').onclick = () => autoCompute(30);
   document.getElementById('allBtn').onclick = () => {
     const cnt = LISTINGS.filter(x => visible(x) && !calc[x.i]).length;
