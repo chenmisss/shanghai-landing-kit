@@ -140,6 +140,11 @@ html = """<!DOCTYPE html>
     <div class="chips" id="chips"></div>
     <label class="ctl">区域 <select id="distSel"><option value="">全部</option></select></label>
     <label class="ctl">月租≤ <input type="number" id="rentMax" placeholder="不限" step="100"> 元</label>
+    <div class="seg" id="aptSeg" title="按项目名称识别长租公寓:名称带「寓」、以「店」结尾、或知名品牌(柚米/微领地/自如/魔方/有巢等);识别是启发式的,个别项目可能分错">
+      <button data-v="" class="on">全部</button>
+      <button data-v="no">不看公寓</button>
+      <button data-v="only">只看公寓</button>
+    </div>
     <span id="stats"></span>
   </header>
   <div id="modulebar">
@@ -164,7 +169,8 @@ html = """<!DOCTYPE html>
 <script src="https://webapi.amap.com/loader.js"></script>
 <script>
 const LISTINGS = __DATA__;
-LISTINGS.forEach((x, i) => { x.i = i; });
+const APT_RE = /寓|店$|柚米|微领地|乐巢|自如|客栈|青年社区|小居|魔方|可遇|宸屿|有巢|驿栈|驿站/;
+LISTINGS.forEach((x, i) => { x.i = i; x.apt = APT_RE.test(x.n); });
 const PRESET = { lon: __DEST_LON__, lat: __DEST_LAT__, name: '__DEST_NAME__' };
 const TIME_BUCKETS = [
   { max: 30, label: '≤30分' }, { max: 45, label: '31–45分' }, { max: 60, label: '46–60分' },
@@ -184,7 +190,7 @@ let calc = {};                   // 自定义模式实算结果: i -> {tm,dm,st}
 let calcToken = 0;               // 目的地变更后作废旧计算
 let calcBusy = false;
 let bucketOn = [true, true, true, true, true, true];
-let rentMax = null, distSel = '';
+let rentMax = null, distSel = '', aptSel = '';
 let markers = [], infoWindow = null, gmap = null, destMarker = null, AMapRef = null;
 
 function esc(t) {
@@ -207,8 +213,14 @@ function bucketIdx(v) {
 function fmtRent(x) {
   return (x.rl != null && x.rh != null) ? (x.rl === x.rh ? '¥' + Math.round(x.rl) : '¥' + Math.round(x.rl) + '–' + Math.round(x.rh)) : '¥?';
 }
+function aptOk(x) {
+  if (aptSel === 'no') return !x.apt;
+  if (aptSel === 'only') return x.apt;
+  return true;
+}
 function visible(x) {
   if (distSel && x.d !== distSel) return false;
+  if (!aptOk(x)) return false;
   if (!bucketOn[bucketIdx(metric(x))]) return false;
   if (rentMax != null && x.rl != null && x.rl > rentMax) return false;
   return true;
@@ -259,7 +271,7 @@ function restyle() {
 }
 function renderChips() {
   const counts = [0, 0, 0, 0, 0, 0];
-  LISTINGS.filter(x => !distSel || x.d === distSel).forEach(x => counts[bucketIdx(metric(x))]++);
+  LISTINGS.filter(x => (!distSel || x.d === distSel) && aptOk(x)).forEach(x => counts[bucketIdx(metric(x))]++);
   const el = document.getElementById('chips');
   el.innerHTML = '';
   const items = [...buckets().map((b, i) => ({ label: b.label, color: RAMP[i] })), NODATA];
@@ -516,6 +528,16 @@ AMapLoader.load({
   document.getElementById('rentMax').addEventListener('input', (e) => {
     rentMax = e.target.value ? Number(e.target.value) : null;
     restyle();
+  });
+  const aptBtns = document.querySelectorAll('#aptSeg button');
+  const aptCount = LISTINGS.filter(x => x.apt).length;
+  aptBtns.forEach(b => {
+    if (b.dataset.v === 'only') b.textContent = '只看公寓 (' + aptCount + ')';
+    b.onclick = () => {
+      aptSel = b.dataset.v;
+      aptBtns.forEach(o => { o.className = o === b ? 'on' : ''; });
+      restyle();
+    };
   });
   const distCount = {};
   LISTINGS.forEach(x => { distCount[x.d] = (distCount[x.d] || 0) + 1; });
