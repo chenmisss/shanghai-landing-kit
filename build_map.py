@@ -145,6 +145,11 @@ html = """<!DOCTYPE html>
       <button data-v="no">不看公寓</button>
       <button data-v="only">只看公寓</button>
     </div>
+    <div class="seg" id="viewSeg" title="点开任意房源可收藏或排除;标记保存在本机浏览器,换电脑不同步">
+      <button data-v="" class="on">全部</button>
+      <button id="btnFav" data-v="fav">⭐ 收藏 (0)</button>
+      <button id="btnBan" data-v="ban">🚫 已排除 (0)</button>
+    </div>
     <span id="stats"></span>
   </header>
   <div id="modulebar">
@@ -190,7 +195,17 @@ let calc = {};                   // 自定义模式实算结果: i -> {tm,dm,st}
 let calcToken = 0;               // 目的地变更后作废旧计算
 let calcBusy = false;
 let bucketOn = [true, true, true, true, true, true];
-let rentMax = null, distSel = '', aptSel = '';
+let rentMax = null, distSel = '', aptSel = '', viewSel = '';
+function loadSet(k) { try { return new Set(JSON.parse(localStorage.getItem(k) || '[]')); } catch (e) { return new Set(); } }
+const favSet = loadSet('gzf_fav_v1');
+const banSet = loadSet('gzf_ban_v1');
+function pkey(x) { return x.n + '|' + x.d; }
+function saveMarks() {
+  try {
+    localStorage.setItem('gzf_fav_v1', JSON.stringify([...favSet]));
+    localStorage.setItem('gzf_ban_v1', JSON.stringify([...banSet]));
+  } catch (e) { /* 隐私模式等场景:标记仅本次会话有效 */ }
+}
 let markers = [], infoWindow = null, gmap = null, destMarker = null, AMapRef = null;
 
 function esc(t) {
@@ -218,7 +233,13 @@ function aptOk(x) {
   if (aptSel === 'only') return x.apt;
   return true;
 }
+function viewOk(x) {
+  if (viewSel === 'fav') return favSet.has(pkey(x));
+  if (viewSel === 'ban') return banSet.has(pkey(x));
+  return !banSet.has(pkey(x));
+}
 function visible(x) {
+  if (!viewOk(x)) return false;
   if (distSel && x.d !== distSel) return false;
   if (!aptOk(x)) return false;
   if (!bucketOn[bucketIdx(metric(x))]) return false;
@@ -255,23 +276,33 @@ function iwHtml(x) {
     (x.mn ? '<div class="dim">最近站：' + x.mn + (x.md != null ? ' ' + x.md + 'm' : '') + (x.ml ? '（' + x.ml + '）' : '') + '</div>' : '') +
     (x.ph ? '<div class="dim">管家：' + tel + '</div>' : '') +
     '<a class="go" target="_blank" href="https://uri.amap.com/direction?from=' + from + '&to=' + to + '&mode=bus&src=gzf">公交导航 ↗</a>' +
-    '<a class="go" target="_blank" href="https://uri.amap.com/direction?from=' + from + '&to=' + to + '&mode=car&src=gzf">驾车导航 ↗</a></div>';
+    '<a class="go" target="_blank" href="https://uri.amap.com/direction?from=' + from + '&to=' + to + '&mode=car&src=gzf">驾车导航 ↗</a><br>' +
+    '<a class="go" href="javascript:void(0)" onclick="toggleFav(' + x.i + ')" style="border-color:#d99a06;color:#a87804">' + (favSet.has(pkey(x)) ? '★ 已收藏' : '☆ 收藏') + '</a>' +
+    '<a class="go" href="javascript:void(0)" onclick="toggleBan(' + x.i + ')" style="border-color:#c05f5f;color:#a33">' + (banSet.has(pkey(x)) ? '↩ 取消排除' : '✕ 排除(看过了)') + '</a></div>';
 }
 function restyle() {
   let shown = 0;
   markers.forEach(mk => {
     const x = mk.getExtData();
     const bi = bucketIdx(metric(x));
-    mk.setOptions({ fillColor: bi === 5 ? NODATA.color : RAMP[bi], radius: bi === 5 ? NODATA.r : RADII[bi], zIndex: 20 - bi });
+    const isF = favSet.has(pkey(x));
+    mk.setOptions({
+      fillColor: bi === 5 ? NODATA.color : RAMP[bi], radius: bi === 5 ? NODATA.r : RADII[bi],
+      zIndex: isF ? 40 : 20 - bi,
+      strokeColor: isF ? '#e0a010' : '#ffffff', strokeWeight: isF ? 2.5 : 1, strokeOpacity: isF ? 1 : 0.9,
+    });
     if (visible(x)) { mk.show(); shown++; } else { mk.hide(); }
   });
   document.getElementById('stats').textContent = '显示 ' + shown + ' / ' + LISTINGS.length + ' 个房源';
+  const fb = document.getElementById('btnFav'), bb = document.getElementById('btnBan');
+  if (fb) fb.textContent = '⭐ 收藏 (' + favSet.size + ')';
+  if (bb) bb.textContent = '🚫 已排除 (' + banSet.size + ')';
   renderChips();
   renderList();
 }
 function renderChips() {
   const counts = [0, 0, 0, 0, 0, 0];
-  LISTINGS.filter(x => (!distSel || x.d === distSel) && aptOk(x)).forEach(x => counts[bucketIdx(metric(x))]++);
+  LISTINGS.filter(x => (!distSel || x.d === distSel) && aptOk(x) && viewOk(x)).forEach(x => counts[bucketIdx(metric(x))]++);
   const el = document.getElementById('chips');
   el.innerHTML = '';
   const items = [...buckets().map((b, i) => ({ label: b.label, color: RAMP[i] })), NODATA];
@@ -316,7 +347,7 @@ function renderList() {
         right = '<span class="t"><span class="pending">' + distKm(x).toFixed(1) + '<small>直线km</small></span></span>';
       }
     }
-    div.innerHTML = '<span class="rank">' + (i + 1) + '</span><span class="body"><div class="name">' + x.n + '</div>' +
+    div.innerHTML = '<span class="rank">' + (i + 1) + '</span><span class="body"><div class="name">' + (favSet.has(pkey(x)) ? '⭐ ' : '') + x.n + '</div>' +
       '<div class="meta">' + x.d + ' · ' + fmtRent(x) + (x.mn ? ' · ' + x.mn + ' ' + (x.md || '') + 'm' : '') + '</div></span>' + right;
     div.onclick = () => focusOn(x);
     el.appendChild(div);
@@ -339,6 +370,18 @@ function focusOn(x) {
   infoWindow.open(gmap, [x.lon, x.lat]);
   if (custom && !calc[x.i]) calcAndRefresh(x.i);
 }
+window.toggleFav = function (i) {
+  const x = LISTINGS[i], k = pkey(x);
+  if (favSet.has(k)) favSet.delete(k); else { favSet.add(k); banSet.delete(k); }
+  saveMarks(); restyle();
+  infoWindow.setContent(iwHtml(x));
+};
+window.toggleBan = function (i) {
+  const x = LISTINGS[i], k = pkey(x);
+  if (banSet.has(k)) banSet.delete(k); else { banSet.add(k); favSet.delete(k); }
+  saveMarks(); restyle();
+  if (banSet.has(k) && viewSel !== 'ban') infoWindow.close(); else infoWindow.setContent(iwHtml(x));
+};
 // —— 自定义目的地：实算通勤 ——
 function calcOne(x, token) {
   return new Promise(resolve => {
@@ -537,6 +580,18 @@ AMapLoader.load({
       aptSel = b.dataset.v;
       aptBtns.forEach(o => { o.className = o === b ? 'on' : ''; });
       restyle();
+    };
+  });
+  const viewBtns = document.querySelectorAll('#viewSeg button');
+  viewBtns.forEach(b => {
+    b.onclick = () => {
+      viewSel = b.dataset.v;
+      viewBtns.forEach(o => { o.className = o === b ? 'on' : ''; });
+      restyle();
+      if (viewSel) {
+        const vis = markers.filter(mk => visible(mk.getExtData()));
+        if (vis.length) gmap.setFitView(vis, false, [60, 60, 60, 60]);
+      }
     };
   });
   const distCount = {};
